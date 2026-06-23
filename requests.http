@@ -1,0 +1,206 @@
+### =============================================================================
+###  Kingdom backend — manual API tests  (IntelliJ HTTP Client)
+###
+###  HOW TO RUN:
+###    1) Start the app  (green Run button in IntelliJ, or:  mvn spring-boot:run)
+###    2) Click the green ▶ arrow to the LEFT of any "###" request below
+###    3) The response (status + body) opens in the Services/Run panel
+###
+###  STATUS CODES you will see (you already met all of these with Neotek!):
+###    200 OK            -> success
+###    400 Bad Request   -> your body is missing/!invalid (validation)
+###    401 Unauthorized  -> missing/!wrong token
+###    403 Forbidden     -> no access / not subscribed
+###    404 Not Found     -> wrong URL, or the id doesn't exist
+###    500 Server Error  -> the server code threw an exception
+### =============================================================================
+
+@base = http://localhost:8080/api/v1
+
+### 1. List all challenges   (expect 200 + a JSON array; [] if none yet)
+GET {{base}}/challenge/get
+Accept: application/json
+
+### 2. Get one challenge by id   (404 if it doesn't exist)
+GET {{base}}/challenge/get/1
+Accept: application/json
+
+### 3. Add a challenge   (NOTE: no xpReward — the server fills it from the fixed table)
+POST {{base}}/challenge/add
+Content-Type: application/json
+
+{
+  "title": "Walk 8000 steps",
+  "description": "Reach 8000 steps today (tracked by Google Health).",
+  "period": "DAILY",
+  "difficulty": "EASY",
+  "verificationSource": "GOOGLE_HEALTH",
+  "metricKey": "steps",
+  "targetValue": 8000,
+  "kingdomId": 1
+}
+
+### 4. Add a BAD challenge (missing title) -> should return 400 with a validation message.
+###    This is how you PROVE your @Valid rules work.
+POST {{base}}/challenge/add
+Content-Type: application/json
+
+{
+  "description": "no title on purpose",
+  "period": "DAILY",
+  "difficulty": "EASY",
+  "verificationSource": "GOOGLE_HEALTH"
+}
+
+### 5. Browse active challenges by difficulty
+GET {{base}}/challenge/difficulty/EASY
+Accept: application/json
+
+### 6. Join a challenge: player 1 joins challenge 1
+###    (needs a Player + a KingdomMembership + the challenge to already exist —
+###     use your teammate's demo data, or create them first, else you'll get an error)
+POST {{base}}/challenge-progress/join/1/1
+
+### 7. See player 1's active challenges
+GET {{base}}/challenge-progress/player/1/active
+Accept: application/json
+
+### 8. Finish a run (id 1) -> awards XP + recomputes division + bumps the daily streak
+POST {{base}}/challenge-progress/finish/1
+
+
+### =============================================================================
+###  Neotek (Open Banking) — these go STRAIGHT to Neotek's sandbox, server-to-server,
+###  so there is NO CORS error like the browser "Try It" gives you.
+###
+###  FIRST: open  http-client.private.env.json  (next to this file), paste your real
+###  client id/secret, then pick the "dev" environment (top-right of this editor).
+### =============================================================================
+
+### N1. Get a Neotek token  (saves the access_token so request N2 can reuse it)
+POST https://test.api.neotek.sa/oauth2security/oauth2/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=client_credentials&client_id={{neotekClientId}}&client_secret={{neotekClientSecret}}&scope=single_api
+
+> {%
+    client.global.set("neotekToken", response.body.access_token);
+    client.test("Token returned 200", function () {
+        client.assert(response.status === 200, "status was " + response.status);
+    });
+%}
+
+### N2. List banks   (uses the token captured in N1)
+GET https://test.api.neotek.sa/financial-institutions-information/v1/financial-institutions
+Accept: application/json
+Authorization: Bearer {{neotekToken}}
+
+### N3. Get an OB-CONNECT token   (creating a consent link needs scope ob_connect, NOT single_api)
+POST https://test.api.neotek.sa/oauth2security/oauth2/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=client_credentials&client_id={{neotekClientId}}&client_secret={{neotekClientSecret}}&scope=ob_connect
+
+> {%
+    client.global.set("neotekConnectToken", response.body.access_token);
+%}
+
+### N4. Create Accounts Link (consent)  ==> WORKS with bank SAIBCSARI (Saib / Saudi Investment Bank).
+###     Returns 201 + Data.AccountsLinkId + Data.RedirectionURL. Open that RedirectionURL in a browser,
+###     log into the sandbox mock bank, and approve -> that activates the consent for this PSUId.
+###     (The earlier 500 was just the wrong bank: BSFR/INMA/SAMAModelBank aren't provisioned for consent.)
+POST https://test.api.neotek.sa/accounts-information/v1/accounts-links
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{neotekConnectToken}}
+
+{
+  "Data": {
+    "FinancialInstitutionId": "SAIBCSARI",
+    "SecurityProfile": "Redirection",
+    "DataGroups": [
+      { "DataGroupId": "AccountDetails", "Permissions": ["ReadAccountsBasic", "ReadAccountsDetail"] },
+      { "DataGroupId": "AccountTransactions", "Permissions": ["ReadTransactionsBasic", "ReadTransactionsDetail", "ReadTransactionsDebits"] }
+    ],
+    "PSUId": "20112"
+  }
+}
+
+
+### =============================================================================
+###  Strava (Fitness) — REAL activity data. ONE-TIME setup to get a refresh token:
+###    1) register an app at  https://www.strava.com/settings/api  (Callback Domain = localhost)
+###    2) open this in your BROWSER (replace YOUR_CLIENT_ID), then click Authorize:
+###       https://www.strava.com/oauth/authorize?client_id=YOUR_CLIENT_ID&response_type=code&redirect_uri=http://localhost/exchange_token&approval_prompt=force&scope=activity:read_all
+###    3) the browser fails to load localhost — that's fine; copy the  code=...  value from the address bar
+###    4) paste it into S0 below, run S0 ONCE -> copy "refresh_token" from the response
+###    5) put client id/secret + that refresh_token into http-client.private.env.json (and application-local.properties)
+### =============================================================================
+
+### S0. ONE-TIME: exchange the authorize "code" for tokens   (replace PASTE_CODE_HERE)
+POST https://www.strava.com/api/v3/oauth/token
+Content-Type: application/x-www-form-urlencoded
+
+client_id={{stravaClientId}}&client_secret={{stravaClientSecret}}&code=PASTE_CODE_HERE&grant_type=authorization_code
+
+### S1. Refresh -> access token   (run this each time; Strava tokens last 6 hours)
+POST https://www.strava.com/api/v3/oauth/token
+Content-Type: application/x-www-form-urlencoded
+
+client_id={{stravaClientId}}&client_secret={{stravaClientSecret}}&grant_type=refresh_token&refresh_token={{stravaRefreshToken}}
+
+> {%
+    client.global.set("stravaToken", response.body.access_token);
+%}
+
+### S2. List my recent activities   (uses the token captured in S1)
+GET https://www.strava.com/api/v3/athlete/activities?per_page=10
+Accept: application/json
+Authorization: Bearer {{stravaToken}}
+
+
+### =============================================================================
+###  VERIFICATION FLOW (YOUR backend) — RESTART your app first so it has these endpoints.
+###  Needs neotek.enabled=true + strava.enabled=true in application-local.properties.
+###  Charity reads Neotek (real sandbox); Fitness reads Strava (real account).
+### =============================================================================
+
+### V1. Charity — start a consent (returns AccountsLinkId + RedirectionURL; open the URL in a browser + approve)
+POST {{base}}/verify/charity/link?psuId=20112
+
+### V2. Charity — inspect the consented account's transactions
+GET {{base}}/verify/charity/transactions?psuId=20112
+Accept: application/json
+
+### V3. Charity — PASS RULE: any outgoing booked donation >= 1 SAR (window = last 10 years)
+GET {{base}}/verify/charity/check?psuId=20112&minAmountSar=1&fromDays=3650
+Accept: application/json
+
+### V4. Charity — PASS RULE for a named charity (>= 100 SAR whose payee/narrative contains "Ehsan")
+GET {{base}}/verify/charity/check?psuId=20112&minAmountSar=100&charityName=Ehsan&fromDays=3650
+Accept: application/json
+
+### V5. Fitness — list my Strava activities
+GET {{base}}/verify/fitness/activities?fromDays=30
+Accept: application/json
+
+### V6. Fitness — PASS RULE: did I cover >= 5000 m of running this month?
+GET {{base}}/verify/fitness/check?metricKey=distance_meters&targetValue=5000&sportType=Run&fromDays=30
+Accept: application/json
+
+### V7. Volunteer — upload a certificate PDF for AI verification
+###     Put a file named certificate.pdf next to this file first (or change the path after the "<").
+###     Needs openai.enabled=true + a real openai.api-key in application-local.properties.
+POST {{base}}/verify/volunteer/upload
+Content-Type: multipart/form-data; boundary=KingdomBoundary
+
+--KingdomBoundary
+Content-Disposition: form-data; name="activity"
+
+beach cleanup
+--KingdomBoundary
+Content-Disposition: form-data; name="file"; filename="certificate.pdf"
+Content-Type: application/pdf
+
+< ./certificate.pdf
+--KingdomBoundary--
