@@ -28,37 +28,46 @@ This subsystem is where a player **lives inside the kingdoms**. It serves browsi
 
 ## AI in Kingdom
 
-Two AI features in this area are player-facing. The **kingdom recommendation** reads a player's stated interests and suggests the kingdom that fits them best. The **AI player report** generates a personalised, plain-Arabic performance summary and emails it to the player. The **Reading, Gaming, and Faith** kingdoms run on **AI-generated challenges** (shared `AiService`, OpenAI gpt-5.5) and are verified through **quizzes** — reading-comprehension questions sourced from **Google Books**, **Faith / Quran** quizzes delivered and graded over **WhatsApp**, and **Steam** playtime/achievement checks for Gaming. XP is always awarded by our own code, never the model.
+Two AI features in this area are player-facing. The **kingdom recommendation** reads a player's stated interests and suggests the kingdom that fits them best. The **AI player report** generates a personalised, plain-Arabic performance summary and emails it to the player. The **Reading, Gaming, and Faith** kingdoms run on **AI-generated challenges** (shared `AiService`, OpenAI gpt-5.5) and are verified through **quizzes** — reading-comprehension questions sourced from **Google Books**, **Faith / Quran tafsir** quizzes delivered and graded over **WhatsApp**, and **Steam** playtime/achievement checks for Gaming. XP is always awarded by our own code, never the model.
 
 ## My extra endpoints
 
-The endpoints I added on top of the shared CRUD. Base URL `http://localhost:8080` (local) or the live deployment, all under `/api/v1`. Auth is HTTP Basic.
+Base URL `http://localhost:8080` (local) or the live deployment, all under `/api/v1`. Auth is HTTP Basic.
 
 | Method | Path | What it does |
 |---|---|---|
-| GET | `/kingdom/{kingdomId}/land-control/{division}` | Land-control summary for a division of a kingdom. |
-| GET | `/kingdom/{kingdomId}/leaderboard/period/{period}` | Kingdom leaderboard for a period (daily/weekly/monthly). |
-| GET | `/kingdom/{kingdomId}/leaderboard/period/{period}/division/{division}` | Leaderboard for a period within one division. |
-| GET | `/kingdom/{kingdomId}/leaderboard/division/{division}` | Leaderboard within one division. |
-| POST | `/kingdom/ai-recommendation` | AI recommends a kingdom for the player from their interests. |
-| GET | `/kingdom-membership/{kingdomId}/member-xp` | The player's XP in a kingdom. |
-| GET | `/kingdom-membership/{kingdomId}/member-streak` | The player's current daily streak. |
-| GET | `/kingdom-membership/{kingdomId}/member-divison` | The player's division (D3→D1). |
-| GET | `/kingdom-membership/{kingdomId}/member-rank` | The player's rank in the kingdom. |
-| GET | `/kingdom-membership/{kingdomId}/member-land-percentage` | The player's land-control percentage. |
-| GET | `/kingdom-membership/{kingdomId}/xp-need-to-higher-rank` | XP still needed to reach the next rank. |
-| GET | `/kingdom-membership/{kingdomId}/number-of-completed-challenges` | Count of the player's completed challenges. |
-| GET | `/kingdom-membership/{kingdomId}/division-progress` | Progress toward the next division. |
-| POST | `/player/ai-report` | Generate the player's AI report (PDF) and email it. |
-| GET | `/player/summary` | The player's cross-kingdom summary. |
-| GET | `/player/best-kingdom` | The player's strongest kingdom. |
-| GET | `/player/kingdoms` | The kingdoms the player belongs to. |
-| GET | `/player/highest-streak` | The player's highest streak across kingdoms. |
-| GET | `/player-badge/player-badges` | All badges the player has earned. |
-| GET | `/player-badge/{kingdomId}/member-badges` | Badges the player earned in one kingdom. |
-| GET | `/subscription/days-left` | Days remaining on the player's premium subscription. |
-| GET | `/lobby/{lobbyId}/member-count` | Number of members in a lobby. |
-| GET | `/lobby/my-finished` | The player's finished lobbies. |
+| GET | `/kingdom/get` | List all kingdoms. |
+| GET | `/kingdom/get/{id}` | One kingdom's details. |
+| POST | `/kingdom/ai-recommendation` | AI recommends the kingdom that fits the player's interests. |
+| GET | `/kingdom/{kingdomId}/leaderboard/period/{period}` | Leaderboard for a kingdom by time period. |
+| GET | `/kingdom/{kingdomId}/leaderboard/division/{division}` | Leaderboard filtered to one division. |
+| GET | `/kingdom/{kingdomId}/leaderboard/period/{period}/division/{division}` | Leaderboard by period and division. |
+| GET | `/kingdom/{kingdomId}/land-control/{division}` | Land-control summary for a kingdom + division. |
+| POST | `/kingdom-membership/join/{kingdomId}` | Join a kingdom. |
+| DELETE | `/kingdom-membership/leave/{kingdomId}` | Leave a kingdom. |
+| GET | `/kingdom-membership/{kingdomId}/membership-id` | Resolve my membership id for a kingdom. |
+| GET | `/kingdom-membership/{kingdomId}/member-xp` | My XP in a kingdom. |
+| GET | `/kingdom-membership/{kingdomId}/member-streak` | My streak in a kingdom. |
+| GET | `/kingdom-membership/{kingdomId}/member-divison` | My division in a kingdom. |
+| GET | `/kingdom-membership/{kingdomId}/member-rank` | My leaderboard rank in a kingdom. |
+| GET | `/kingdom-membership/{kingdomId}/member-land-percentage` | % of land I control in a kingdom. |
+| GET | `/kingdom-membership/{kingdomId}/division-progress` | My progress toward the next division. |
+| GET | `/kingdom-membership/{kingdomId}/xp-need-to-higher-rank` | XP I still need for the next rank. |
+| GET | `/kingdom-membership/{kingdomId}/number-of-completed-challenges` | Count of challenges I completed in a kingdom. |
+| GET | `/player/me` | The logged-in caller's identity (full profile for players). |
+| GET | `/player/get` | My full profile. |
+| PUT | `/player/update` | Update my profile. |
+| POST | `/player/ai-report` | Generate + email my AI performance report. |
+| GET | `/player/summary` | My activity & stats summary. |
+| GET | `/player/best-kingdom` | My best-performing kingdom. |
+| GET | `/player/kingdoms` | The kingdoms I participate in. |
+| GET | `/player/highest-streak` | My highest streak across kingdoms. |
+| GET | `/player-badge/player-badges` | The badges I've earned. |
+| GET | `/player-badge/{kingdomId}/member-badges` | The badges I've earned in one kingdom. |
+| POST | `/challenge-question/whatsapp/webhook` | Inbound WhatsApp quiz answer (Twilio) — grades the reply. |
+| GET | `/subscription/days-left` | Days left on my subscription. |
+| GET | `/lobby/my-finished` | The lobbies I've finished. |
+| GET | `/lobby/{lobbyId}/member-count` | How many members a lobby has. |
 
 ## Tech stack
 
