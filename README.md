@@ -22,7 +22,7 @@ Describes the whole Kingdom system (15 entities), shared across the team; the mo
 
 ![Use case diagram — Kingdoms System](docs/use-case-diagram.png)
 
-## My area: Kingdom, KingdomMembership, Badge, PlayerBadge and PeriodScore
+## My area: Kingdom, KingdomMembership, Badge, PlayerBadge, PeriodScore and ChallengeQuestion
 
 This subsystem is where a player **lives inside the kingdoms**. It serves browsing and joining **kingdoms**, the **AI kingdom recommendation** that matches a player's interests to a kingdom, per-kingdom **membership** with all the player's standing — **XP, streak, division, badge, rank, land control, and progress to the next division** — and the **leaderboards** (by period, by division, or both). It also owns the **player profile** and the **AI-written performance report**, the player's **earned badges**, and the **seasonal period-scores**. Finally it owns the **challenge-question quizzes**, including the **WhatsApp quiz** that grades a player's answers by message. Kingdoms owned here: **Reading, Gaming, Faith**.
 
