@@ -1,4 +1,4 @@
-# Shahad — Kingdom (الممالك) Modules
+# Kingdom (الممالك) 
 
 > Kingdoms, memberships, leaderboards, player profiles, earned badges, and AI recommendations for a gamified Arabic-first self-improvement platform.
 
