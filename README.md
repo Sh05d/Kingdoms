@@ -36,13 +36,14 @@ Base URL `http://localhost:8080` (local) or the live deployment, all under `/api
 
 | Method | Path | What it does |
 |---|---|---|
-| GET | `/kingdom/get` | List all kingdoms. |
-| GET | `/kingdom/get/{id}` | One kingdom's details. |
+
 | POST | `/kingdom/ai-recommendation` | AI recommends the kingdom that fits the player's interests. |
 | GET | `/kingdom/{kingdomId}/leaderboard/period/{period}` | Leaderboard for a kingdom by time period. |
 | GET | `/kingdom/{kingdomId}/leaderboard/division/{division}` | Leaderboard filtered to one division. |
 | GET | `/kingdom/{kingdomId}/leaderboard/period/{period}/division/{division}` | Leaderboard by period and division. |
 | GET | `/kingdom/{kingdomId}/land-control/{division}` | Land-control summary for a kingdom + division. |
+| GET | `/kingdom/get` | List all kingdoms. |
+| GET | `/kingdom/get/{id}` | One kingdom's details. |
 | POST | `/kingdom-membership/join/{kingdomId}` | Join a kingdom. |
 | DELETE | `/kingdom-membership/leave/{kingdomId}` | Leave a kingdom. |
 | GET | `/kingdom-membership/{kingdomId}/membership-id` | Resolve my membership id for a kingdom. |
