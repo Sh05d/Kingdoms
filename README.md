@@ -54,9 +54,6 @@ Base URL `http://localhost:8080` (local) or the live deployment, all under `/api
 | GET | `/kingdom-membership/{kingdomId}/division-progress` | My progress toward the next division. |
 | GET | `/kingdom-membership/{kingdomId}/xp-need-to-higher-rank` | XP I still need for the next rank. |
 | GET | `/kingdom-membership/{kingdomId}/number-of-completed-challenges` | Count of challenges I completed in a kingdom. |
-| GET | `/player/me` | The logged-in caller's identity (full profile for players). |
-| GET | `/player/get` | My full profile. |
-| PUT | `/player/update` | Update my profile. |
 | POST | `/player/ai-report` | Generate + email my AI performance report. |
 | GET | `/player/summary` | My activity & stats summary. |
 | GET | `/player/best-kingdom` | My best-performing kingdom. |
