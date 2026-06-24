@@ -36,7 +36,6 @@ Base URL `http://localhost:8080` (local) or the live deployment, all under `/api
 
 | Method | Path | What it does |
 |---|---|---|
-
 | POST | `/kingdom/ai-recommendation` | AI recommends the kingdom that fits the player's interests. |
 | GET | `/kingdom/{kingdomId}/leaderboard/period/{period}` | Leaderboard for a kingdom by time period. |
 | GET | `/kingdom/{kingdomId}/leaderboard/division/{division}` | Leaderboard filtered to one division. |
