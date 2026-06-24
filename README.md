@@ -68,7 +68,7 @@ Base URL `http://localhost:8080` (local) or the live deployment, all under `/api
 
 ## Tech stack
 
-Java 17 · Spring Boot 4.0.6 · Spring Web · Spring Data JPA (Hibernate) · MySQL · Lombok · Maven · OpenAI (gpt-5.5) · Steam · Google Books · Twilio (WhatsApp) · Mailtrap.
+Java 17 · Spring Boot 4.0.6 · Spring Web · Spring Data JPA (Hibernate) · MySQL · Lombok · Maven · OpenAI (gpt-5.5) · LemonSqueezy · n8n · GitHub · AI Vision · Stream ·Strava · Google Books · Tafsir API · Quran Cloud API · Neotek · Twilio (WhatsApp) · Mailtrap.
 
 ## Run it
 
